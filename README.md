@@ -255,10 +255,6 @@ API info and validation rules.
 }
 ```
 
-## Continuous Training
-
-Automatic model retraining with evaluation gate. See CONTINUOUS_TRAINING.md for full documentation.
-
 ## License
 
 MIT
