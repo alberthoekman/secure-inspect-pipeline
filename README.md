@@ -64,6 +64,35 @@ curl -F "file=@sample.jpg" http://localhost:8000/inspect
 curl -F "file=@img1.jpg" -F "file=@img2.jpg" http://localhost:8000/batch
 ```
 
+## Continuous Training
+
+This project includes a continuous training pipeline that keeps the inspection model fresh and safe. When new data is available, the pipeline retrains the model, evaluates it, and decides whether the new version should go to production or remain in staging for review.
+
+- New data lands in S3 and triggers model retraining
+- Each candidate model is evaluated against a promotion gate
+- Passing models are promoted to production automatically
+- Failing models are held for manual review
+- This helps prevent model drift and avoids deploying bad updates
+
+### Promotion gate
+
+The pipeline checks:
+
+- mAP improvement >= 1%
+- Precision >= 0.70
+- Recall >= 0.70
+- Absolute mAP >= 0.50
+
+Result:
+- PASS ALL → Production
+- FAIL ANY → Staging for review
+
+### How it runs
+
+- Local test: `python scripts/trigger_training.py`
+- AWS deploy: `cd infra && terraform apply`
+- GitHub Actions can run the pipeline on a schedule or in CI
+
 ## Docker
 
 ### Build Image
