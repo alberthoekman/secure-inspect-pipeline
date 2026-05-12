@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 
 from src.app import app
 
-
 client = TestClient(app)
 
 
@@ -37,8 +36,7 @@ def test_root_endpoint():
 def test_inspect_valid_image(valid_image):
     """Test inspection with valid image."""
     response = client.post(
-        "/inspect",
-        files={"file": ("test.png", valid_image, "image/png")}
+        "/inspect", files={"file": ("test.png", valid_image, "image/png")}
     )
     assert response.status_code == 200
     data = response.json()
@@ -52,8 +50,7 @@ def test_inspect_valid_image(valid_image):
 def test_inspect_small_image(small_image):
     """Test rejection of too-small image."""
     response = client.post(
-        "/inspect",
-        files={"file": ("small.png", small_image, "image/png")}
+        "/inspect", files={"file": ("small.png", small_image, "image/png")}
     )
     assert response.status_code == 400
     assert "Validation failed" in response.json()["detail"]
@@ -61,18 +58,14 @@ def test_inspect_small_image(small_image):
 
 def test_inspect_empty_file():
     """Test rejection of empty file."""
-    response = client.post(
-        "/inspect",
-        files={"file": ("empty.png", b"", "image/png")}
-    )
+    response = client.post("/inspect", files={"file": ("empty.png", b"", "image/png")})
     assert response.status_code == 400
 
 
 def test_inspect_invalid_format():
     """Test rejection of invalid file format."""
     response = client.post(
-        "/inspect",
-        files={"file": ("test.txt", b"not an image", "text/plain")}
+        "/inspect", files={"file": ("test.txt", b"not an image", "text/plain")}
     )
     assert response.status_code == 400
 
@@ -92,7 +85,10 @@ def test_batch_inspect_too_many_files(valid_image):
 
 def test_batch_inspect_valid(valid_image):
     """Test batch inspection with valid images."""
-    files = [("test1.png", valid_image, "image/png"), ("test2.png", valid_image, "image/png")]
+    files = [
+        ("test1.png", valid_image, "image/png"),
+        ("test2.png", valid_image, "image/png"),
+    ]
     response = client.post("/batch", files=files)
     assert response.status_code == 200
     data = response.json()

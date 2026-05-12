@@ -13,15 +13,25 @@ logger = logging.getLogger(__name__)
 class MLflowRegistry:
     """MLflow model tracking and registry."""
 
-    def __init__(self, tracking_uri: str = "http://localhost:5000", experiment_name: str = "secure-inspect"):
+    def __init__(
+        self,
+        tracking_uri: str = "http://localhost:5000",
+        experiment_name: str = "secure-inspect",
+    ):
         """Initialize MLflow registry."""
         self.tracking_uri = tracking_uri
         self.experiment_name = experiment_name
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment_name)
 
-    def log_training_run(self, model_path: str, metrics: Dict[str, float], params: Dict[str, any],
-                        model_name: str = "yolov8-inspect", tags: Optional[Dict[str, str]] = None) -> str:
+    def log_training_run(
+        self,
+        model_path: str,
+        metrics: Dict[str, float],
+        params: Dict[str, any],
+        model_name: str = "yolov8-inspect",
+        tags: Optional[Dict[str, str]] = None,
+    ) -> str:
         """Log training run to MLflow."""
         with mlflow.start_run():
             for key, value in params.items():
@@ -40,21 +50,27 @@ class MLflowRegistry:
             logger.info(f"Logged run {run_id} to MLflow")
             return run_id
 
-    def register_model(self, model_uri: str, model_name: str = "yolov8-inspect", stage: str = "Staging") -> str:
+    def register_model(
+        self, model_uri: str, model_name: str = "yolov8-inspect", stage: str = "Staging"
+    ) -> str:
         """Register model in MLflow registry."""
         try:
             result = mlflow.register_model(model_uri, model_name)
             logger.info(f"Registered model {model_name} version {result.version}")
 
             client = mlflow.tracking.MlflowClient()
-            client.transition_model_version_stage(name=model_name, version=result.version, stage=stage)
+            client.transition_model_version_stage(
+                name=model_name, version=result.version, stage=stage
+            )
             logger.info(f"Transitioned {model_name}@{result.version} to {stage}")
             return result.version
         except Exception as e:
             logger.error(f"Failed to register model: {str(e)}")
             raise
 
-    def get_model_version(self, model_name: str = "yolov8-inspect", stage: str = "Production") -> Optional[Dict]:
+    def get_model_version(
+        self, model_name: str = "yolov8-inspect", stage: str = "Production"
+    ) -> Optional[Dict]:
         """Get model version from registry."""
         try:
             client = mlflow.tracking.MlflowClient()
@@ -97,7 +113,9 @@ class MLflowRegistry:
             return None
 
 
-def load_baseline_metrics(baseline_path: str = "baseline_metrics.json") -> Dict[str, float]:
+def load_baseline_metrics(
+    baseline_path: str = "baseline_metrics.json",
+) -> Dict[str, float]:
     """Load baseline metrics for comparison."""
     if os.path.exists(baseline_path):
         with open(baseline_path, "r") as f:
@@ -105,7 +123,9 @@ def load_baseline_metrics(baseline_path: str = "baseline_metrics.json") -> Dict[
     return {"mAP": 0.0, "precision": 0.0, "recall": 0.0}
 
 
-def save_baseline_metrics(metrics: Dict[str, float], baseline_path: str = "baseline_metrics.json"):
+def save_baseline_metrics(
+    metrics: Dict[str, float], baseline_path: str = "baseline_metrics.json"
+):
     """Save baseline metrics for future comparisons."""
     with open(baseline_path, "w") as f:
         json.dump(metrics, f, indent=2)

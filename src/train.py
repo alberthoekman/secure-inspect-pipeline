@@ -34,8 +34,16 @@ class ModelTrainer:
             logger.error(f"Failed to load model: {str(e)}")
             raise
 
-    def train(self, data_yaml: str, epochs: int = 10, imgsz: int = 640, batch_size: int = 8,
-              lr0: float = 0.001, patience: int = 5, save_dir: str = "runs/detect") -> Dict[str, float]:
+    def train(
+        self,
+        data_yaml: str,
+        epochs: int = 10,
+        imgsz: int = 640,
+        batch_size: int = 8,
+        lr0: float = 0.001,
+        patience: int = 5,
+        save_dir: str = "runs/detect",
+    ) -> Dict[str, float]:
         """Fine-tune model on new data."""
         if not self.model:
             self.load_model()
@@ -99,13 +107,21 @@ class ModelTrainer:
             raise
 
 
-def train_with_mlflow(data_yaml: str, epochs: int = 10, batch_size: int = 8, lr0: float = 0.001,
-                      device: str = "cpu", experiment_name: str = "secure-inspect",
-                      run_name: Optional[str] = None) -> Tuple[Dict[str, float], str]:
+def train_with_mlflow(
+    data_yaml: str,
+    epochs: int = 10,
+    batch_size: int = 8,
+    lr0: float = 0.001,
+    device: str = "cpu",
+    experiment_name: str = "secure-inspect",
+    run_name: Optional[str] = None,
+) -> Tuple[Dict[str, float], str]:
     """Train model and log to MLflow."""
     mlflow.set_experiment(experiment_name)
 
-    with mlflow.start_run(run_name=run_name or f"train_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
+    with mlflow.start_run(
+        run_name=run_name or f"train_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    ):
         mlflow.log_param("base_model", "yolov8n.pt")
         mlflow.log_param("epochs", epochs)
         mlflow.log_param("batch_size", batch_size)
@@ -116,7 +132,9 @@ def train_with_mlflow(data_yaml: str, epochs: int = 10, batch_size: int = 8, lr0
         trainer.load_model()
 
         try:
-            metrics = trainer.train(data_yaml=data_yaml, epochs=epochs, batch_size=batch_size, lr0=lr0)
+            metrics = trainer.train(
+                data_yaml=data_yaml, epochs=epochs, batch_size=batch_size, lr0=lr0
+            )
 
             for key, value in metrics.items():
                 mlflow.log_metric(key, value)
@@ -127,7 +145,9 @@ def train_with_mlflow(data_yaml: str, epochs: int = 10, batch_size: int = 8, lr0
             mlflow.set_tag("status", "success")
             mlflow.set_tag("model_path", model_path)
 
-            logger.info(f"Training run complete. Run ID: {mlflow.active_run().info.run_id}")
+            logger.info(
+                f"Training run complete. Run ID: {mlflow.active_run().info.run_id}"
+            )
             return metrics, model_path
 
         except Exception as e:

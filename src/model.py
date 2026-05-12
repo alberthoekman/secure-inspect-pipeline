@@ -12,7 +12,9 @@ from .monitoring import InferenceMetrics
 class ObjectDetectionModel:
     """Wrapper for YOLOv8 inference."""
 
-    def __init__(self, model_name: str = "yolov8n.pt", confidence_threshold: float = 0.5):
+    def __init__(
+        self, model_name: str = "yolov8n.pt", confidence_threshold: float = 0.5
+    ):
         """
         Initialize YOLOv8 model.
 
@@ -34,7 +36,9 @@ class ObjectDetectionModel:
         except Exception as e:
             raise RuntimeError(f"Failed to load model {self.model_name}: {str(e)}")
 
-    def predict(self, image: Image.Image, metrics: InferenceMetrics) -> List[Dict[str, Any]]:
+    def predict(
+        self, image: Image.Image, metrics: InferenceMetrics
+    ) -> List[Dict[str, Any]]:
         """
         Run inference on image.
 
@@ -104,7 +108,10 @@ class ObjectDetectionModel:
                     "x_max": float(box.xyxy[0][2]),
                     "y_max": float(box.xyxy[0][3]),
                 },
-                "box_area": float((box.xyxy[0][2] - box.xyxy[0][0]) * (box.xyxy[0][3] - box.xyxy[0][1])),
+                "box_area": float(
+                    (box.xyxy[0][2] - box.xyxy[0][0])
+                    * (box.xyxy[0][3] - box.xyxy[0][1])
+                ),
             }
             detections.append(detection)
 

@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EvaluationResult:
     """Result of model evaluation."""
+
     model_version: str
     metrics: Dict[str, float]
     baseline_metrics: Dict[str, float]
@@ -22,16 +23,25 @@ class EvaluationResult:
 class ModelGate:
     """Promotion gate for model deployment."""
 
-    def __init__(self, min_mAP_improvement: float = 0.01, min_precision: float = 0.7,
-                 min_recall: float = 0.7, min_absolute_mAP: float = 0.5):
+    def __init__(
+        self,
+        min_mAP_improvement: float = 0.01,
+        min_precision: float = 0.7,
+        min_recall: float = 0.7,
+        min_absolute_mAP: float = 0.5,
+    ):
         """Initialize promotion gate."""
         self.min_mAP_improvement = min_mAP_improvement
         self.min_precision = min_precision
         self.min_recall = min_recall
         self.min_absolute_mAP = min_absolute_mAP
 
-    def evaluate(self, new_metrics: Dict[str, float], baseline_metrics: Optional[Dict[str, float]] = None,
-                 model_version: str = "unknown") -> EvaluationResult:
+    def evaluate(
+        self,
+        new_metrics: Dict[str, float],
+        baseline_metrics: Optional[Dict[str, float]] = None,
+        model_version: str = "unknown",
+    ) -> EvaluationResult:
         """Evaluate model and determine promotion stage."""
         if baseline_metrics is None:
             baseline_metrics = {"mAP": 0.0, "precision": 0.0, "recall": 0.0}
@@ -39,7 +49,8 @@ class ModelGate:
         improvements = self._calculate_improvements(new_metrics, baseline_metrics)
 
         checks = {
-            "mAP_improvement": improvements.get("mAP_pct", 0) >= self.min_mAP_improvement * 100,
+            "mAP_improvement": improvements.get("mAP_pct", 0)
+            >= self.min_mAP_improvement * 100,
             "min_precision": new_metrics.get("precision", 0) >= self.min_precision,
             "min_recall": new_metrics.get("recall", 0) >= self.min_recall,
             "min_absolute_mAP": new_metrics.get("mAP", 0) >= self.min_absolute_mAP,
@@ -59,10 +70,14 @@ class ModelGate:
             reason=reason,
         )
 
-        logger.info(f"Model evaluation: {model_version}, Passed: {passed_gate}, Stage: {promotion_stage}")
+        logger.info(
+            f"Model evaluation: {model_version}, Passed: {passed_gate}, Stage: {promotion_stage}"
+        )
         return result
 
-    def _calculate_improvements(self, new_metrics: Dict[str, float], baseline_metrics: Dict[str, float]) -> Dict[str, float]:
+    def _calculate_improvements(
+        self, new_metrics: Dict[str, float], baseline_metrics: Dict[str, float]
+    ) -> Dict[str, float]:
         """Calculate metric improvements."""
         improvements = {}
 
@@ -80,7 +95,9 @@ class ModelGate:
 
         return improvements
 
-    def _generate_reason(self, checks: Dict[str, bool], improvements: Dict[str, float]) -> str:
+    def _generate_reason(
+        self, checks: Dict[str, bool], improvements: Dict[str, float]
+    ) -> str:
         """Generate promotion reason/rejection reason."""
         failed = [k for k, v in checks.items() if not v]
 
@@ -91,7 +108,9 @@ class ModelGate:
         reasons = []
         for check in failed:
             if check == "mAP_improvement":
-                reasons.append(f"mAP improvement {improvements.get('mAP_pct', 0):.2f}% < {self.min_mAP_improvement * 100:.1f}%")
+                reasons.append(
+                    f"mAP improvement {improvements.get('mAP_pct', 0):.2f}% < {self.min_mAP_improvement * 100:.1f}%"
+                )
             elif check == "min_precision":
                 reasons.append(f"Precision below {self.min_precision}")
             elif check == "min_recall":

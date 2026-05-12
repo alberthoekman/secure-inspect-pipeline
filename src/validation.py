@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class ImageValidationConfig:
     """Validation thresholds."""
+
     MIN_WIDTH = 64
     MIN_HEIGHT = 64
     MAX_FILE_SIZE_MB = 10
@@ -18,22 +19,26 @@ class ImageValidationConfig:
 
 class ImageMetadata(BaseModel):
     """Image metadata after validation."""
+
     width: int = Field(..., ge=1)
     height: int = Field(..., ge=1)
     format: str
     file_size_bytes: int = Field(..., ge=1)
     is_valid: bool = True
 
-    @field_validator('format')
+    @field_validator("format")
     @classmethod
     def validate_format(cls, v: str) -> str:
         if v.upper() not in ImageValidationConfig.ALLOWED_FORMATS:
-            raise ValueError(f"Format {v} not supported. Allowed: {ImageValidationConfig.ALLOWED_FORMATS}")
+            raise ValueError(
+                f"Format {v} not supported. Allowed: {ImageValidationConfig.ALLOWED_FORMATS}"
+            )
         return v.upper()
 
 
 class ValidationError(Exception):
     """Custom validation exception."""
+
     pass
 
 

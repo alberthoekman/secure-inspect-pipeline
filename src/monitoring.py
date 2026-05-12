@@ -8,7 +8,6 @@ from typing import Any, Dict, Optional
 
 import structlog
 
-
 # Configure structured logging
 structlog.configure(
     processors=[

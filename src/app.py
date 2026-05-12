@@ -10,8 +10,12 @@ import time
 
 from .model import ObjectDetectionModel
 from .validation import validate_image_file, get_validation_summary, ValidationError
-from .monitoring import InferenceMetrics, log_inference_metrics, log_validation_error, log_api_request
-
+from .monitoring import (
+    InferenceMetrics,
+    log_inference_metrics,
+    log_validation_error,
+    log_api_request,
+)
 
 # Initialize app
 app = FastAPI(
@@ -52,9 +56,12 @@ async def add_process_time_header(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     process_time = (time.time() - start_time) * 1000
-    log_api_request(request.method, request.url.path, response.status_code, process_time)
-    
+    log_api_request(
+        request.method, request.url.path, response.status_code, process_time
+    )
+
     return response
+
 
 @app.post("/inspect")
 async def inspect_image(file: UploadFile = File(...)):
@@ -149,24 +156,30 @@ async def batch_inspect(files: list[UploadFile] = File(...)):
             metrics_dict = metrics.get_metrics()
             log_inference_metrics(metrics_dict)
 
-            results.append({
-                "filename": file.filename,
-                "status": "success",
-                "detections": detections,
-                "metrics": metrics_dict,
-            })
+            results.append(
+                {
+                    "filename": file.filename,
+                    "status": "success",
+                    "detections": detections,
+                    "metrics": metrics_dict,
+                }
+            )
         except ValidationError as e:
-            results.append({
-                "filename": file.filename,
-                "status": "validation_error",
-                "error": str(e),
-            })
+            results.append(
+                {
+                    "filename": file.filename,
+                    "status": "validation_error",
+                    "error": str(e),
+                }
+            )
         except Exception as e:
-            results.append({
-                "filename": file.filename,
-                "status": "error",
-                "error": str(e),
-            })
+            results.append(
+                {
+                    "filename": file.filename,
+                    "status": "error",
+                    "error": str(e),
+                }
+            )
 
     return {
         "batch_id": batch_id,
@@ -193,4 +206,5 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
