@@ -1,0 +1,13 @@
+# Example Terraform variables
+# Copy to terraform.tfvars and fill in your values
+
+resource_group_name = "secure-inspect-rg"
+location            = "eastus"
+container_image     = "secureinspect.azurecr.io/inspect-pipeline:latest"
+container_port      = 8000
+cpu_cores           = "1.0"
+memory_gb           = "2.0"
+
+# Set via environment variables or CLI:
+# image_pull_username = "your-registry-username"
+# image_pull_password = "your-registry-password"

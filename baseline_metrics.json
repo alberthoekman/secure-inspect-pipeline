@@ -1,0 +1,6 @@
+{
+  "mAP": 0.50,
+  "precision": 0.72,
+  "recall": 0.68,
+  "model_version": "v0.1.0"
+}
