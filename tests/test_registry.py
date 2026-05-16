@@ -61,6 +61,3 @@ class TestBaselineMetrics:
         finally:
             os.unlink(tmp_path)
 
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])

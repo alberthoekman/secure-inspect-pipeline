@@ -126,7 +126,3 @@ class TestInferenceMetrics:
             }
         )
         log_api_request("POST", "/inspect", 200, 150.0)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])

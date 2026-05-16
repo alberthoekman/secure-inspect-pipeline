@@ -37,7 +37,3 @@ class TestValidation:
         large_bytes = b"x" * (11 * 1024 * 1024)  # 11 MB
         with pytest.raises(ValidationError):
             validate_image_file(large_bytes)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])

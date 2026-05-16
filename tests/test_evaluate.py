@@ -132,6 +132,3 @@ class TestModelGate:
         assert result.promotion_stage == "Production"
         assert result.reason == "Good enough"
 
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
