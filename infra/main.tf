@@ -18,7 +18,7 @@ provider "azurerm" {
 variable "resource_group_name" {
   description = "Name of resource group"
   type        = string
-  default     = "secure-inspect-rg"
+  default     = "Test"
 }
 
 variable "location" {
