@@ -190,6 +190,25 @@ async def batch_inspect(files: list[UploadFile] = File(...)):
     }
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {
+        "status": "ok",
+        "model_loaded": bool(model_instance),
+    }
+
+
+@app.get("/info")
+async def info():
+    """API info and validation rules."""
+    return {
+        "service": "Secure Inspect Pipeline",
+        "version": "1.0.0",
+        "validation": get_validation_summary(),
+    }
+
+
 @app.get("/")
 async def root():
     """Root endpoint."""

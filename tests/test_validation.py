@@ -21,17 +21,17 @@ class TestValidation:
         with pytest.raises(ValidationError):
             validate_image_file(small_image)
 
-    def test_validate_empty_file():
+    def test_validate_empty_file(self):
         """Test validation with empty file."""
         with pytest.raises(ValidationError):
             validate_image_file(b"")
 
-    def test_validate_invalid_file():
+    def test_validate_invalid_file(self):
         """Test validation with invalid file."""
         with pytest.raises(ValidationError):
             validate_image_file(b"not an image")
 
-    def test_validate_too_large():
+    def test_validate_too_large(self):
         """Test validation with oversized file."""
         # Create large byte sequence
         large_bytes = b"x" * (11 * 1024 * 1024)  # 11 MB

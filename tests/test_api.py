@@ -1,21 +1,16 @@
 """API tests for inspection pipeline."""
 
 import pytest
-from fastapi.testclient import TestClient
-
-from src.app import app
-
-client = TestClient(app)
 
 
-def test_health_check():
+def test_health_check(client):
     """Test health endpoint."""
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
+    assert response.json()["status"] == "ok"
 
 
-def test_info_endpoint():
+def test_info_endpoint(client):
     """Test info endpoint."""
     response = client.get("/info")
     assert response.status_code == 200
@@ -26,14 +21,14 @@ def test_info_endpoint():
     assert data["validation"]["min_height"] == 64
 
 
-def test_root_endpoint():
+def test_root_endpoint(client):
     """Test root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
     assert "endpoints" in response.json()
 
 
-def test_inspect_valid_image(valid_image):
+def test_inspect_valid_image(valid_image, client):
     """Test inspection with valid image."""
     response = client.post(
         "/inspect", files={"file": ("test.png", valid_image, "image/png")}
@@ -47,7 +42,7 @@ def test_inspect_valid_image(valid_image):
     assert "inference_time_ms" in data["metrics"]
 
 
-def test_inspect_small_image(small_image):
+def test_inspect_small_image(small_image, client):
     """Test rejection of too-small image."""
     response = client.post(
         "/inspect", files={"file": ("small.png", small_image, "image/png")}
@@ -56,13 +51,13 @@ def test_inspect_small_image(small_image):
     assert "Validation failed" in response.json()["detail"]
 
 
-def test_inspect_empty_file():
+def test_inspect_empty_file(client):
     """Test rejection of empty file."""
     response = client.post("/inspect", files={"file": ("empty.png", b"", "image/png")})
     assert response.status_code == 400
 
 
-def test_inspect_invalid_format():
+def test_inspect_invalid_format(client):
     """Test rejection of invalid file format."""
     response = client.post(
         "/inspect", files={"file": ("test.txt", b"not an image", "text/plain")}
@@ -70,20 +65,20 @@ def test_inspect_invalid_format():
     assert response.status_code == 400
 
 
-def test_batch_inspect_no_files():
+def test_batch_inspect_no_files(client):
     """Test batch endpoint without files."""
     response = client.post("/batch", files=[])
     assert response.status_code == 400
 
 
-def test_batch_inspect_too_many_files(valid_image):
+def test_batch_inspect_too_many_files(valid_image, client):
     """Test batch endpoint with >10 files."""
     files = [("test.png", valid_image, "image/png")] * 11
     response = client.post("/batch", files=files)
     assert response.status_code == 400
 
 
-def test_batch_inspect_valid(valid_image):
+def test_batch_inspect_valid(valid_image, client):
     """Test batch inspection with valid images."""
     files = [
         ("test1.png", valid_image, "image/png"),
