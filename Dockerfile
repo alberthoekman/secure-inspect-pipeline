@@ -1,46 +1,23 @@
-# Multi-stage build for Secure Inspect Pipeline
-# Stage 1: Builder
-FROM python:3.11-slim as builder
-
-WORKDIR /build
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install
-COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
-
-
-# Stage 2: Runtime
+# Single-stage build for Secure Inspect Pipeline (POC)
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install runtime dependencies only
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
-
 # Create non-root user
 RUN useradd -m -u 1000 -s /bin/bash mlops
 
-# Copy Python packages from builder
-COPY --from=builder /root/.local /home/mlops/.local
+# Install production dependencies — CPU-only PyTorch to keep image small
+COPY requirements.txt .
+RUN pip install --no-cache-dir \
+    --index-url https://download.pytorch.org/whl/cpu \
+    --extra-index-url https://pypi.org/simple \
+    -r requirements.txt
 
 # Copy application code
 COPY --chown=mlops:mlops src/ /app/src/
-COPY --chown=mlops:mlops requirements.txt /app/
 
-# Set environment variables
-ENV PATH=/home/mlops/.local/bin:$PATH \
-    PYTHONUNBUFFERED=1 \
+# Environment
+ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     TORCH_HOME=/tmp/torch
 
