@@ -131,4 +131,3 @@ class TestModelGate:
         assert result.passed_gate is True
         assert result.promotion_stage == "Production"
         assert result.reason == "Good enough"
-

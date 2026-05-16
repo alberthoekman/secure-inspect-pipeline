@@ -20,9 +20,7 @@ class TestBaselineMetrics:
     def test_load_returns_parsed_json(self):
         """Existing file returns parsed content."""
         data = {"mAP": 0.75, "precision": 0.85, "recall": 0.80}
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(data, f)
             tmp_path = f.name
 
@@ -60,4 +58,3 @@ class TestBaselineMetrics:
             assert loaded == original
         finally:
             os.unlink(tmp_path)
-
