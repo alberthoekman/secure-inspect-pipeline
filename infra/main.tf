@@ -80,7 +80,7 @@ resource "azurerm_container_registry" "main" {
   name                = "secureinspectacr${replace(var.location, " ", "")}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  sku                 = "Basic"
+  sku                 = "Premium"
   admin_enabled       = true
 
   tags = {
@@ -109,7 +109,7 @@ resource "azurerm_container_group" "main" {
     }
 
     # Liveness probe
-    livenessProbe {
+    liveness_probe {
       http_get {
         path   = "/health"
         port   = var.container_port
@@ -122,7 +122,7 @@ resource "azurerm_container_group" "main" {
     }
 
     # Readiness probe
-    readinessProbe {
+    readiness_probe {
       http_get {
         path   = "/health"
         port   = var.container_port
