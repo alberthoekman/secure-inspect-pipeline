@@ -131,7 +131,7 @@ async def inspect_image(file: UploadFile = File(...)):
 
 
 @app.post("/batch")
-async def batch_inspect(files: list[UploadFile] = File(...)):
+async def batch_inspect(files: Optional[list[UploadFile]] = File(None)):
     """
     Batch inspection endpoint.
 

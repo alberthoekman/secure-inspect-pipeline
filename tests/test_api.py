@@ -73,7 +73,7 @@ def test_batch_inspect_no_files(client):
 
 def test_batch_inspect_too_many_files(valid_image, client):
     """Test batch endpoint with >10 files."""
-    files = [("test.png", valid_image, "image/png")] * 11
+    files = [("files", ("test.png", valid_image, "image/png"))] * 11
     response = client.post("/batch", files=files)
     assert response.status_code == 400
 
@@ -81,8 +81,8 @@ def test_batch_inspect_too_many_files(valid_image, client):
 def test_batch_inspect_valid(valid_image, client):
     """Test batch inspection with valid images."""
     files = [
-        ("test1.png", valid_image, "image/png"),
-        ("test2.png", valid_image, "image/png"),
+        ("files", ("test1.png", valid_image, "image/png")),
+        ("files", ("test2.png", valid_image, "image/png")),
     ]
     response = client.post("/batch", files=files)
     assert response.status_code == 200

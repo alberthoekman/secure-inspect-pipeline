@@ -39,7 +39,8 @@ def client():
                     "box_area": 20000.0,
                 }
             ]
-            yield TestClient(app)
+            with TestClient(app) as test_client:
+                yield test_client
 
 
 @pytest.fixture

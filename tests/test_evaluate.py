@@ -30,7 +30,7 @@ class TestModelGate:
 
         assert result.passed_gate is False
         assert result.promotion_stage == "Staging"
-        assert "mAP improvement" in result.reason.lower()
+        assert "mAP improvement" in result.reason
 
     def test_fails_precision_staging(self):
         """Precision below threshold → Staging."""
