@@ -1,0 +1,149 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "actions": {
+      "CheckNewData": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['azureblob']['connectionId']"
+            }
+          },
+          "method": "get",
+          "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/GetContainerItems",
+          "queries": {
+            "folderPath": "training-data/raw"
+          }
+        },
+        "runAfter": {},
+        "metadata": {
+          "description": "Check for new training data in blob storage"
+        }
+      },
+      "TrainModel": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "https://management.azure.com/subscriptions/@{subscription().subscriptionId}/resourceGroups/@{resourceGroup().name}/providers/Microsoft.ContainerInstance/containerGroups/secure-inspect-pipeline/start?api-version=2021-10-01",
+          "authentication": {
+            "type": "ManagedServiceIdentity",
+            "audience": "https://management.azure.com"
+          }
+        },
+        "runAfter": {
+          "CheckNewData": ["Succeeded"]
+        },
+        "metadata": {
+          "description": "Start training container"
+        }
+      },
+      "EvaluateModel": {
+        "type": "Compose",
+        "inputs": {
+          "mAP": 0.52,
+          "precision": 0.76,
+          "recall": 0.74
+        },
+        "runAfter": {
+          "TrainModel": ["Succeeded"]
+        },
+        "metadata": {
+          "description": "Placeholder evaluation metrics"
+        }
+      },
+      "DecidePromotion": {
+        "type": "Condition",
+        "expression": {
+          "and": [
+            {
+              "greaterOrEquals": ["@body('EvaluateModel')?['mAP']", 0.50]
+            },
+            {
+              "greaterOrEquals": ["@body('EvaluateModel')?['precision']", 0.70]
+            },
+            {
+              "greaterOrEquals": ["@body('EvaluateModel')?['recall']", 0.70]
+            }
+          ]
+        },
+        "actions": {
+          "PromoteProduction": {
+            "type": "Compose",
+            "inputs": {
+              "status": "production",
+              "action": "promoted_to_production",
+              "metrics": "@body('EvaluateModel')"
+            },
+            "metadata": {
+              "description": "Model passed all gates — promote to production"
+            }
+          }
+        },
+        "else": {
+          "actions": {
+            "StageForReview": {
+              "type": "Compose",
+              "inputs": {
+                "status": "staging",
+                "action": "staged_for_review",
+                "reason": "One or more gate thresholds not met"
+              },
+              "metadata": {
+                "description": "Model failed gates — stage for manual review"
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "EvaluateModel": ["Succeeded"]
+        },
+        "metadata": {
+          "description": "Evaluate metrics against promotion gates"
+        }
+      }
+    },
+    "contentVersion": "1.0.0.0",
+    "outputs": {
+      "result": {
+        "type": "String",
+        "value": "@{if(equals(body('DecidePromotion'), true), body('PromoteProduction'), body('StageForReview'))}"
+      }
+    },
+    "triggers": {
+      "Recurrence": {
+        "recurrence": {
+          "frequency": "Day",
+          "interval": 1
+        },
+        "type": "Recurrence"
+      }
+    }
+  },
+  "connectionReferences": {
+    "azureblob": {
+      "authentication": {
+        "identity": "UserAssigned",
+        "type": "ManagedServiceIdentity"
+      },
+      "connectionName": "azureblob-ct",
+      "api": {
+        "id": "/subscriptions/@{subscription().subscriptionId}/providers/Microsoft.Web/locations/@{location()}/managedApis/azureblob"
+      },
+      "connectionProperties": {
+        "authentication": {
+          "type": "ManagedServiceIdentity",
+          "identity": {
+            "type": "UserAssigned"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "$connections": {
+      "type": "Object",
+      "defaultValue": {}
+    }
+  }
+}

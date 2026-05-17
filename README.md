@@ -14,7 +14,10 @@ secure-inspect-pipeline/
 ├── tests/
 │   └── test_api.py      # Pytest + FastAPI TestClient
 ├── infra/
-│   ├── main.tf          # Terraform for Azure Container Instance
+│   ├── main.tf                        # Terraform: ACI, ACR, VNet, Service Bus
+│   ├── blob_storage.tf.example        # Azure Blob Storage (replaces AWS S3)
+│   ├── orchestrator.tf.example        # Azure Logic App orchestrator (replaces Step Functions)
+│   ├── logicapp-workflow.json.example # Workflow definition for the Logic App
 │   └── terraform.tfvars.example
 ├── .github/workflows/
 │   └── mlops-pipeline.yml  # GitHub Actions CI/CD
@@ -68,7 +71,7 @@ curl -F "file=@img1.jpg" -F "file=@img2.jpg" http://localhost:8000/batch
 
 This project includes a continuous training pipeline that keeps the inspection model fresh and safe. When new data is available, the pipeline retrains the model, evaluates it, and decides whether the new version should go to production or remain in staging for review.
 
-- New data lands in S3 and triggers model retraining
+- New data lands in Azure Blob Storage and triggers model retraining (via Logic App or container group start)
 - Each candidate model is evaluated against a promotion gate
 - Passing models are promoted to production automatically
 - Failing models are held for manual review
@@ -89,8 +92,8 @@ Result:
 
 ### How it runs
 
-- Local test: `python scripts/trigger_training.py`
-- AWS deploy: `cd infra && terraform apply`
+- Local test: `python scripts/trigger_training.py` (baseline metrics via Azure Blob Storage or local file)
+- Azure deploy: `cd infra && terraform apply` (provisions ACR, ACI, Blob Storage, Logic App)
 - GitHub Actions can run the pipeline on a schedule or in CI
 
 ## Docker
