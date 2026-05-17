@@ -4,6 +4,8 @@ import json
 import os
 import tempfile
 
+import mlflow
+
 from src.registry import load_baseline_metrics, save_baseline_metrics
 
 
