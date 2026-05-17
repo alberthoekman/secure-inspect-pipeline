@@ -27,7 +27,7 @@ data "azurerm_role_definition" "acr_pull" {
 variable "resource_group_name" {
   description = "Name of resource group"
   type        = string
-  default     = "RG1"  # exercise uses RG1
+  default     = "Test"  # exercise uses RG1
 }
 
 variable "location" {
