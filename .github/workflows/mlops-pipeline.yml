@@ -181,6 +181,7 @@ jobs:
           terraform plan \
             -var="image_pull_username=${{ secrets.REGISTRY_USERNAME }}" \
             -var="image_pull_password=${{ secrets.REGISTRY_PASSWORD }}" \
+            -var="container_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" \
             -out=tfplan
 
       - name: Terraform Apply
